@@ -43,7 +43,7 @@ int main()
 		/// @TODO: Process input frame
 
 		// Emit command.
-		printf("110001\n");
+		printf("110101\n");
 		fflush(stdout);
 	}
 
