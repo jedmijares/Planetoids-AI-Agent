@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdio.h>
+#include <fstream>
 
 #include "json.hpp"
 
@@ -8,6 +9,9 @@ int main()
 	// Unbuffered I/O
 	setvbuf(stdin, NULL, _IONBF, 0);
 	setvbuf(stdout, NULL, _IONBF, 0);
+
+	std::ofstream inputLogFile;
+	inputLogFile.open("F:\\code\\IcpcContestantAll\\ICPC\\cpp\\Debug\\input.jsonl");
 
 	while (true)
 	{
@@ -26,6 +30,8 @@ int main()
 			continue;
 		}
 
+		inputLogFile << Input << std::endl;
+
 		nlohmann::json Json = nlohmann::json::parse(Input);
 
 		// Exit on game over.
@@ -40,6 +46,8 @@ int main()
 		printf("110001\n");
 		fflush(stdout);
 	}
+
+	inputLogFile.close();
 
 	return 0;
 }
