@@ -4,6 +4,7 @@
 #include <bitset>
 #include <cmath>
 #include <math.h>
+#include <vector>
 
 #include "json.hpp"
 
@@ -17,7 +18,12 @@ public:
 	double x;
 	double y;
 
+	Vector2(double x, double y);
+
 	double distanceSquared(const Vector2 other);
+
+	// finds the closest point in a parallel universe
+	Vector2 closestParallelPoint(const Vector2 other);
 
 	// returns orientation (degrees from axis) to ideally point this to goal
 	double orientToGoal(const Vector2 goal);
@@ -70,23 +76,25 @@ int main()
 		controller ^= bullet;
 		controller ^= thrust;
 
-		Vector2 shipPos;
-		shipPos.x = Json["shipPos"][0];
-		shipPos.y = Json["shipPos"][1];
+		Vector2 shipPos{ Json["shipPos"][0], Json["shipPos"][1] };
+		/*shipPos.x = Json["shipPos"][0];
+		shipPos.y = Json["shipPos"][1];*/
 
-		Vector2 artPos;
-		artPos.x = Json["artfPos"][0];
-		artPos.y = Json["artfPos"][1];
+		Vector2 artPos{ Json["artfPos"][0], Json["artfPos"][1] };
+		/*artPos.x = Json["artfPos"][0];
+		artPos.y = Json["artfPos"][1];*/
 
 		double shipR = Json["shipR"];
 
-		if (shipPos.x < artPos.x)
+		/*if (shipPos.x < artPos.x)
 		{
 			shipPos.x += SCREEN_WIDTH;
-		}
+		}*/
 
-		double deviation = 20.0;
-		/*if (shipR <= 180.0 - deviation)
+		Vector2 goal = shipPos.closestParallelPoint(artPos);
+
+		/*double deviation = 20.0;
+		if (shipR <= 180.0 - deviation)
 		{
 			controller ^= counterclockwise;
 		}
@@ -97,7 +105,7 @@ int main()
 		if (false) {}
 		else 
 		{
-			double rotDif = shipPos.orientToGoal(artPos) - shipR;
+			double rotDif = shipPos.orientToGoal(goal) - shipR;
 			if (rotDif < 0)
 			{
 				rotDif += 360;
@@ -122,9 +130,41 @@ int main()
 	return 0;
 }
 
+Vector2::Vector2(double xIn, double yIn)
+{
+	x = xIn;
+	y = yIn;
+}
+
 double Vector2::distanceSquared(const Vector2 other)
 {
 	return (other.x - this->x) * (other.x - this->x) + (other.y - this->y) * (other.y - this->y);
+}
+
+Vector2 Vector2::closestParallelPoint(const Vector2 other)
+{
+	std::vector<Vector2> parallelPoints;
+	// parallelPoints.emplace_back(Vector2{ other.x, other.y });
+	parallelPoints.emplace_back(Vector2{ other.x + SCREEN_WIDTH, other.y });
+	parallelPoints.emplace_back(Vector2{ other.x - SCREEN_WIDTH, other.y });
+	parallelPoints.emplace_back(Vector2{ other.x, other.y + SCREEN_HEIGHT});
+	parallelPoints.emplace_back(Vector2{ other.x, other.y - SCREEN_HEIGHT });
+	parallelPoints.emplace_back(Vector2{ other.x + SCREEN_WIDTH, other.y + SCREEN_HEIGHT });
+	parallelPoints.emplace_back(Vector2{ other.x + SCREEN_WIDTH, other.y - SCREEN_HEIGHT });
+	parallelPoints.emplace_back(Vector2{ other.x - SCREEN_WIDTH, other.y + SCREEN_HEIGHT });
+	parallelPoints.emplace_back(Vector2{ other.x - SCREEN_WIDTH, other.y - SCREEN_HEIGHT });
+
+	double minDistance = this->distanceSquared(other);
+	Vector2 returnVal = other;
+	for (auto point : parallelPoints)
+	{
+		if (this->distanceSquared(point) < minDistance)
+		{
+			returnVal = point;
+			minDistance = this->distanceSquared(point);
+		}
+	}
+	return returnVal;
 }
 
 double Vector2::orientToGoal(const Vector2 goal)
