@@ -21,10 +21,9 @@ public:
 	Vector2(double xIn, double yIn);
 
 	double distanceSquared(const Vector2 other);
-
 	double magnitudeSquared();
 
-	// finds the closest point in a parallel universe
+	// finds the closest point in any "parallel universe"
 	Vector2 closestParallelPoint(const Vector2 other);
 
 	// returns orientation (degrees from axis) to ideally point this to goal
@@ -37,9 +36,7 @@ int main()
 	setvbuf(stdin, NULL, _IONBF, 0);
 	setvbuf(stdout, NULL, _IONBF, 0);
 
-	// std::ofstream inputLogFile;
-	// inputLogFile.open("F:\\code\\IcpcContestantAll\\ICPC\\cpp\\Debug\\input.jsonl");
-
+	// controls
 	const std::bitset<6> thrust = 0b100000;
 	const std::bitset<6> clockwise = 0b010000;
 	const std::bitset<6> counterclockwise = 0b001000;
@@ -50,7 +47,6 @@ int main()
 
 	while (true)
 	{
-		std::bitset<6> controller = 0b000001;
 
 		// Read simulation frame.
 		std::string Input;
@@ -67,8 +63,6 @@ int main()
 			continue;
 		}
 
-		// inputLogFile << Input << std::endl;
-
 		nlohmann::json Json = nlohmann::json::parse(Input);
 
 		// Exit on game over.
@@ -77,6 +71,7 @@ int main()
 			break;
 		}
 
+		std::bitset<6> controller = 0b000001;
 		controller ^= bullet;
 
 		Vector2 shipPos{ Json["shipPos"][0], Json["shipPos"][1] };
@@ -84,16 +79,18 @@ int main()
 
 		Vector2 shipVel{ lastPos.x - shipPos.x, lastPos.y - shipPos.y };
 
-		double shipR = Json["shipR"];
+		double shipRot = Json["shipR"];
 
 		Vector2 goal = shipPos.closestParallelPoint(artPos);
 
-		double rotDif = shipPos.orientToGoal(goal) - shipR;
+		// find difference between current orientation and direction we want to go
+		double rotDif = shipPos.orientToGoal(goal) - shipRot;
 		if (rotDif < 0)
 		{
 			rotDif += 360;
 		}
 
+		// choose which direction to turn
 		if (rotDif < 180.0)
 		{
 			controller ^= counterclockwise;
@@ -103,43 +100,41 @@ int main()
 			controller ^= clockwise;
 		}
 		
-		double shipVelR = atan(shipVel.y / shipVel.x) * 180 / PI;
-		if (shipR > 90 && shipR < 270)
+		// find direction of current velocity
+		double shipVelDir = atan(shipVel.y / shipVel.x) * 180 / PI;
+		if (shipRot > 90 && shipRot < 270)
 		{
-			shipVelR += 180;
+			shipVelDir += 180;
 		}
-		if (shipVelR < 0)
+		if (shipVelDir < 0)
 		{
-			shipVelR += 360;
+			shipVelDir += 360;
 		}
-		else if (shipVelR > 360)
+		else if (shipVelDir > 360)
 		{
-			shipVelR -= 360;
+			shipVelDir -= 360;
 		}
 
-		double rShipToGoal = shipPos.orientToGoal(goal);
+		double shipToGoalDir = shipPos.orientToGoal(goal);
 		double goalDist = shipPos.distanceSquared(goal);
 		double velMag = shipVel.magnitudeSquared();
-		double shipDirGoalDif = abs(shipVelR - rShipToGoal);
+		double shipDirGoalDif = abs(shipVelDir - shipToGoalDir);
 
-		if (shipPos.distanceSquared(goal) < 100)
+		// do not thrust if it might make us miss the goal
+		if (goalDist < 100)
 		{
 			controller ^= thrust;
 		}
-		else if ((velMag > 500 && goalDist < 8000 && shipDirGoalDif > 50.0) || (shipDirGoalDif > 50.0 && velMag > 100))
+		else if ((velMag > 500 && goalDist < 8000 && shipDirGoalDif > 50.0) || (velMag > 200 && goalDist < 800000 && shipDirGoalDif > 35.0) || (shipDirGoalDif > 50.0 && velMag > 100))
 		{
-			int i = 0;
-		}
-		else if ((velMag > 200 && goalDist < 800000 && shipDirGoalDif > 35.0) || (shipDirGoalDif > 50.0 && velMag > 100))
-		{
-			int i = 0;
 		}
 		else
 		{
 			controller ^= thrust;
 		}
 
-		if (goalDist > 20000000 && abs(rotDif) > 100.0)
+		// warp if far from the goal and not pointing there
+		if (goalDist > 12000000 && abs(rotDif) > 100.0)
 		{
 			controller ^= hyperspace;
 		}
@@ -150,9 +145,6 @@ int main()
 		std::cout << controller << std::endl;
 		fflush(stdout);
 	}
-
-	// inputLogFile.close();
-
 	return 0;
 }
 
