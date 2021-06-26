@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <bitset>
+#include <cmath>
 
 #include "json.hpp"
 
@@ -51,7 +52,42 @@ int main()
 		/// @TODO: Process input frame
 		controller ^= bullet;
 		controller ^= thrust;
-		controller ^= clockwise;
+
+		if (Json["shipR"] <= 90)
+		{
+			controller ^= counterclockwise;
+		}
+		else if (Json["shipR"] >= 270)
+		{
+			controller ^= clockwise;
+		}
+		else 
+		{
+			double artfH = Json["artfPos"][1];
+			double shipH = Json["shipPos"][1];
+			if (std::abs(artfH - shipH) > 400)
+			{
+				if (Json["artfPos"][1] > Json["shipPos"][1])
+				{
+					controller ^= clockwise;
+				}
+				else
+				{
+					controller ^= counterclockwise;
+				}
+			}
+			else
+			{
+				if (Json["shipR"] <= 180)
+				{
+					controller ^= counterclockwise;
+				}
+				else
+				{
+					controller ^= clockwise;
+				}
+			}
+		}
 
 		// Emit command.
 		std::cout << controller << std::endl;
