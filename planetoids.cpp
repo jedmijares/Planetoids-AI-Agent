@@ -18,7 +18,7 @@ public:
 	double x;
 	double y;
 
-	Vector2(double x, double y);
+	Vector2(double xIn, double yIn);
 
 	double distanceSquared(const Vector2 other);
 
@@ -77,19 +77,9 @@ int main()
 		controller ^= thrust;
 
 		Vector2 shipPos{ Json["shipPos"][0], Json["shipPos"][1] };
-		/*shipPos.x = Json["shipPos"][0];
-		shipPos.y = Json["shipPos"][1];*/
-
 		Vector2 artPos{ Json["artfPos"][0], Json["artfPos"][1] };
-		/*artPos.x = Json["artfPos"][0];
-		artPos.y = Json["artfPos"][1];*/
 
 		double shipR = Json["shipR"];
-
-		/*if (shipPos.x < artPos.x)
-		{
-			shipPos.x += SCREEN_WIDTH;
-		}*/
 
 		Vector2 goal = shipPos.closestParallelPoint(artPos);
 
@@ -144,7 +134,6 @@ double Vector2::distanceSquared(const Vector2 other)
 Vector2 Vector2::closestParallelPoint(const Vector2 other)
 {
 	std::vector<Vector2> parallelPoints;
-	// parallelPoints.emplace_back(Vector2{ other.x, other.y });
 	parallelPoints.emplace_back(Vector2{ other.x + SCREEN_WIDTH, other.y });
 	parallelPoints.emplace_back(Vector2{ other.x - SCREEN_WIDTH, other.y });
 	parallelPoints.emplace_back(Vector2{ other.x, other.y + SCREEN_HEIGHT});
@@ -169,8 +158,6 @@ Vector2 Vector2::closestParallelPoint(const Vector2 other)
 
 double Vector2::orientToGoal(const Vector2 goal)
 {
-	// double slope = (goal.y - this->y) / (goal.x - this->x);
-	// double returnVal = atan(slope) * 180 / PI;
 	double returnVal = atan2(goal.y - this->y, goal.x - this->x) * 180 / PI;
 	if (returnVal < 0)
 	{
