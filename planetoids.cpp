@@ -29,8 +29,8 @@ int main()
 	setvbuf(stdin, NULL, _IONBF, 0);
 	setvbuf(stdout, NULL, _IONBF, 0);
 
-	std::ofstream inputLogFile;
-	inputLogFile.open("F:\\code\\IcpcContestantAll\\ICPC\\cpp\\Debug\\input.jsonl");
+	// std::ofstream inputLogFile;
+	// inputLogFile.open("F:\\code\\IcpcContestantAll\\ICPC\\cpp\\Debug\\input.jsonl");
 
 	const std::bitset<6> thrust = 0b100000;
 	const std::bitset<6> clockwise = 0b010000;
@@ -57,7 +57,7 @@ int main()
 			continue;
 		}
 
-		inputLogFile << Input << std::endl;
+		// inputLogFile << Input << std::endl;
 
 		nlohmann::json Json = nlohmann::json::parse(Input);
 
@@ -109,7 +109,7 @@ int main()
 		fflush(stdout);
 	}
 
-	inputLogFile.close();
+	// inputLogFile.close();
 
 	return 0;
 }
