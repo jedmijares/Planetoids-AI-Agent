@@ -3,8 +3,25 @@
 #include <fstream>
 #include <bitset>
 #include <cmath>
+#include <math.h>
 
 #include "json.hpp"
+
+const unsigned int SCREEN_WIDTH = 7600;
+const unsigned int SCREEN_HEIGHT = 4200;
+
+constexpr auto PI = 3.14159265;
+
+class Vector2 {
+public:
+	double x;
+	double y;
+
+	double distanceSquared(const Vector2 other);
+
+	// returns orientation (degrees from axis) to ideally point this to goal
+	double orientToGoal(const Vector2 goal);
+};
 
 int main()
 {
@@ -15,14 +32,15 @@ int main()
 	std::ofstream inputLogFile;
 	inputLogFile.open("F:\\code\\IcpcContestantAll\\ICPC\\cpp\\Debug\\input.jsonl");
 
+	const std::bitset<6> thrust = 0b100000;
+	const std::bitset<6> clockwise = 0b010000;
+	const std::bitset<6> counterclockwise = 0b001000;
+	const std::bitset<6> bullet = 0b000100;
+	const std::bitset<6> hyperspace = 0b000010;
+
 	while (true)
 	{
 		std::bitset<6> controller = 0b000001;
-		std::bitset<6> thrust = 0b100000;
-		std::bitset<6> clockwise = 0b010000;
-		std::bitset<6> counterclockwise = 0b001000;
-		std::bitset<6> bullet = 0b000100;
-		std::bitset<6> hyperspace = 0b000010;
 
 		// Read simulation frame.
 		std::string Input;
@@ -53,39 +71,36 @@ int main()
 		controller ^= bullet;
 		controller ^= thrust;
 
-		if (Json["shipR"] <= 90)
+		Vector2 shipPos;
+		shipPos.x = Json["shipPos"][0];
+		shipPos.y = Json["shipPos"][1];
+
+		Vector2 artPos;
+		artPos.x = Json["artfPos"][0];
+		artPos.y = Json["artfPos"][1];
+
+		if (shipPos.x < artPos.x)
+		{
+			shipPos.x += SCREEN_WIDTH;
+		}
+
+		if (Json["shipR"] <= 170)
 		{
 			controller ^= counterclockwise;
 		}
-		else if (Json["shipR"] >= 270)
+		else if (Json["shipR"] >= 190)
 		{
 			controller ^= clockwise;
 		}
 		else 
 		{
-			double artfH = Json["artfPos"][1];
-			double shipH = Json["shipPos"][1];
-			if (std::abs(artfH - shipH) > 400)
+			if (shipPos.orientToGoal(artPos) < 180)
 			{
-				if (Json["artfPos"][1] > Json["shipPos"][1])
-				{
-					controller ^= clockwise;
-				}
-				else
-				{
-					controller ^= counterclockwise;
-				}
+				controller ^= counterclockwise;
 			}
 			else
 			{
-				if (Json["shipR"] <= 180)
-				{
-					controller ^= counterclockwise;
-				}
-				else
-				{
-					controller ^= clockwise;
-				}
+				controller ^= clockwise;
 			}
 		}
 
@@ -99,3 +114,18 @@ int main()
 	return 0;
 }
 
+double Vector2::distanceSquared(const Vector2 other)
+{
+	return (other.x - this->x) * (other.x - this->x) + (other.y - this->y) * (other.y - this->y);
+}
+
+double Vector2::orientToGoal(const Vector2 goal)
+{
+	double slope = (this->y - goal.y) / (this->x - goal.x);
+	double returnVal = atan(slope) * 180 / PI;
+	if (returnVal < 0)
+	{
+		returnVal += 360;
+	}
+	return returnVal;
+}
