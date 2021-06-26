@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <fstream>
+#include <bitset>
 
 #include "json.hpp"
 
@@ -15,6 +16,13 @@ int main()
 
 	while (true)
 	{
+		std::bitset<6> controller = 0b000001;
+		std::bitset<6> thrust = 0b100000;
+		std::bitset<6> clockwise = 0b010000;
+		std::bitset<6> counterclockwise = 0b001000;
+		std::bitset<6> bullet = 0b000100;
+		std::bitset<6> hyperspace = 0b000010;
+
 		// Read simulation frame.
 		std::string Input;
 		std::getline(std::cin, Input);
@@ -41,9 +49,12 @@ int main()
 		}
 
 		/// @TODO: Process input frame
+		controller ^= bullet;
+		controller ^= thrust;
+		controller ^= clockwise;
 
 		// Emit command.
-		printf("110101\n");
+		std::cout << controller << std::endl;
 		fflush(stdout);
 	}
 
