@@ -82,49 +82,66 @@ int main()
 		Vector2 shipPos{ Json["shipPos"][0], Json["shipPos"][1] };
 		Vector2 artPos{ Json["artfPos"][0], Json["artfPos"][1] };
 
-		Vector2 shipVel{ shipPos.x - lastPos.x, shipPos.y - lastPos.y };
+		Vector2 shipVel{ lastPos.x - shipPos.x, lastPos.y - shipPos.y };
 
 		double shipR = Json["shipR"];
 
 		Vector2 goal = shipPos.closestParallelPoint(artPos);
 
-		/*double deviation = 20.0;
-		if (shipR <= 180.0 - deviation)
+		double rotDif = shipPos.orientToGoal(goal) - shipR;
+		if (rotDif < 0)
+		{
+			rotDif += 360;
+		}
+
+		if (rotDif < 180.0)
 		{
 			controller ^= counterclockwise;
 		}
-		else if (shipR >= 180.0 + deviation)
+		else
 		{
 			controller ^= clockwise;
-		}*/
-		if (false) {}
-		else 
+		}
+		
+		double shipVelR = atan(shipVel.y / shipVel.x) * 180 / PI;
+		if (shipR > 90 && shipR < 270)
 		{
-			double rotDif = shipPos.orientToGoal(goal) - shipR;
-			if (rotDif < 0)
-			{
-				rotDif += 360;
-			}
-			if (rotDif < 180.0)
-			{
-				controller ^= counterclockwise;
-			}
-			else
-			{
-				controller ^= clockwise;
-			}
+			shipVelR += 180;
+		}
+		if (shipVelR < 0)
+		{
+			shipVelR += 360;
+		}
+		else if (shipVelR > 360)
+		{
+			shipVelR -= 360;
 		}
 
-		double mag = shipVel.magnitudeSquared();
+		double rShipToGoal = shipPos.orientToGoal(goal);
 		double goalDist = shipPos.distanceSquared(goal);
+		double velMag = shipVel.magnitudeSquared();
+		double shipDirGoalDif = abs(shipVelR - rShipToGoal);
 
-		if (shipVel.magnitudeSquared() > 300 && shipPos.distanceSquared(goal) < 700000)
+		if (shipPos.distanceSquared(goal) < 100)
 		{
-
+			controller ^= thrust;
+		}
+		else if ((velMag > 500 && goalDist < 8000 && shipDirGoalDif > 50.0) || (shipDirGoalDif > 50.0 && velMag > 100))
+		{
+			int i = 0;
+		}
+		else if ((velMag > 200 && goalDist < 800000 && shipDirGoalDif > 35.0) || (shipDirGoalDif > 50.0 && velMag > 100))
+		{
+			int i = 0;
 		}
 		else
 		{
 			controller ^= thrust;
+		}
+
+		if (goalDist > 20000000 && abs(rotDif) > 100.0)
+		{
+			controller ^= hyperspace;
 		}
 
 		lastPos = shipPos;
