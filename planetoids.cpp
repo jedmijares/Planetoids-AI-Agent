@@ -22,6 +22,8 @@ public:
 
 	double distanceSquared(const Vector2 other);
 
+	double magnitudeSquared();
+
 	// finds the closest point in a parallel universe
 	Vector2 closestParallelPoint(const Vector2 other);
 
@@ -43,6 +45,8 @@ int main()
 	const std::bitset<6> counterclockwise = 0b001000;
 	const std::bitset<6> bullet = 0b000100;
 	const std::bitset<6> hyperspace = 0b000010;
+
+	Vector2 lastPos{ 0, 0 };
 
 	while (true)
 	{
@@ -74,10 +78,11 @@ int main()
 		}
 
 		controller ^= bullet;
-		controller ^= thrust;
 
 		Vector2 shipPos{ Json["shipPos"][0], Json["shipPos"][1] };
 		Vector2 artPos{ Json["artfPos"][0], Json["artfPos"][1] };
+
+		Vector2 shipVel{ shipPos.x - lastPos.x, shipPos.y - lastPos.y };
 
 		double shipR = Json["shipR"];
 
@@ -110,6 +115,20 @@ int main()
 			}
 		}
 
+		double mag = shipVel.magnitudeSquared();
+		double goalDist = shipPos.distanceSquared(goal);
+
+		if (shipVel.magnitudeSquared() > 300 && shipPos.distanceSquared(goal) < 700000)
+		{
+
+		}
+		else
+		{
+			controller ^= thrust;
+		}
+
+		lastPos = shipPos;
+
 		// Emit command.
 		std::cout << controller << std::endl;
 		fflush(stdout);
@@ -129,6 +148,11 @@ Vector2::Vector2(double xIn, double yIn)
 double Vector2::distanceSquared(const Vector2 other)
 {
 	return (other.x - this->x) * (other.x - this->x) + (other.y - this->y) * (other.y - this->y);
+}
+
+double Vector2::magnitudeSquared()
+{
+	return this->x * this->x + this->y * this->y;
 }
 
 Vector2 Vector2::closestParallelPoint(const Vector2 other)
