@@ -67,7 +67,6 @@ int main()
 			break;
 		}
 
-		/// @TODO: Process input frame
 		controller ^= bullet;
 		controller ^= thrust;
 
@@ -87,17 +86,23 @@ int main()
 		}
 
 		double deviation = 20.0;
-		if (shipR <= 180.0 - deviation)
+		/*if (shipR <= 180.0 - deviation)
 		{
 			controller ^= counterclockwise;
 		}
 		else if (shipR >= 180.0 + deviation)
 		{
 			controller ^= clockwise;
-		}
+		}*/
+		if (false) {}
 		else 
 		{
-			if (shipPos.orientToGoal(artPos) < 180.0)
+			double rotDif = shipPos.orientToGoal(artPos) - shipR;
+			if (rotDif < 0)
+			{
+				rotDif += 360;
+			}
+			if (rotDif < 180.0)
 			{
 				controller ^= counterclockwise;
 			}
@@ -124,8 +129,9 @@ double Vector2::distanceSquared(const Vector2 other)
 
 double Vector2::orientToGoal(const Vector2 goal)
 {
-	double slope = (this->y - goal.y) / (this->x - goal.x);
-	double returnVal = atan(slope) * 180 / PI;
+	// double slope = (goal.y - this->y) / (goal.x - this->x);
+	// double returnVal = atan(slope) * 180 / PI;
+	double returnVal = atan2(goal.y - this->y, goal.x - this->x) * 180 / PI;
 	if (returnVal < 0)
 	{
 		returnVal += 360;
