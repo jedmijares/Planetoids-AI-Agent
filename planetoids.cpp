@@ -79,22 +79,25 @@ int main()
 		artPos.x = Json["artfPos"][0];
 		artPos.y = Json["artfPos"][1];
 
+		double shipR = Json["shipR"];
+
 		if (shipPos.x < artPos.x)
 		{
 			shipPos.x += SCREEN_WIDTH;
 		}
 
-		if (Json["shipR"] <= 170)
+		double deviation = 20.0;
+		if (shipR <= 180.0 - deviation)
 		{
 			controller ^= counterclockwise;
 		}
-		else if (Json["shipR"] >= 190)
+		else if (shipR >= 180.0 + deviation)
 		{
 			controller ^= clockwise;
 		}
 		else 
 		{
-			if (shipPos.orientToGoal(artPos) < 180)
+			if (shipPos.orientToGoal(artPos) < 180.0)
 			{
 				controller ^= counterclockwise;
 			}
